@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Grimm Protocol: Endless</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400&display=swap');
+
+        :root {
+            --bg: #050505;
+            --text: #e0e0e0;
+            --accent: #9d00ff; /* Starting Rank Color */
+            --danger: #ff3333;
+            --card-face: #111;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 1s;
+        }
+
+        /* --- RANK DISPLAY --- */
+        .rank-container {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: 'Cinzel', serif;
+        }
+
+        .rank-title {
+            font-size: 2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--accent);
+            transition: all 0.5s;
+        }
+
+        .level-indicator {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* --- PROGRESS BAR --- */
+        .progress-container {
+            width: 100%;
+            max-width: 300px;
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.5s ease, background 0.5s;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* --- THE CARD --- */
+        .scene {
+            width: 300px;
+            height: 450px;
+            perspective: 1000px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card__face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+            background: var(--card-face);
+            border: 1px solid #333;
+        }
+
+        .card__face--front {
+            border: 2px solid var(--accent);
+            cursor: pointer;
+        }
+
+        .card__face--back {
+            transform: rotateY(180deg);
+            border: 1px solid var(--accent);
+        }
+
+        /* --- TEXT CONTENT --- */
+        .fate-gen-text {
+            font-size: 1.3rem;
+            text-align: center;
+            line-height: 1.5;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .constraint-text {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            font-style: italic;
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* --- BUTTONS --- */
+        .btn-group {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        button {
+            padding: 15px;
+            background: transparent;
+            border: 1px solid #444;
+            color: #fff;
+            font-family: 'Cinzel', serif;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-success:active { background: var(--accent); color: black; }
+        .btn-fail { border-color: var(--danger); color: var(--danger); }
+        .btn-fail:active { background: var(--danger); color: white; }
+
+        /* --- STRIKES --- */
+        .strikes {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: var(--danger);
+            font-weight: bold;
+            font-family: 'Cinzel';
+        }
+
+        /* --- ANIMATIONS --- */
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="strikes">STRIKES: <span id="strike-count">0</span>/3</div>
+
+    <div class="rank-container">
+        <div class="level-indicator">CURRENT RANK</div>
+        <div class="rank-title" id="rank-name">INITIATE</div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-fill" id="progress-bar"></div>
+    </div>
+
+    <div class="scene">
+        <div class="card" id="game-card">
+            
+            <div class="card__face card__face--front" onclick="drawFate()">
+                <div style="font-size:3rem; margin-bottom:10px;">👁️</div>
+                <h2 style="font-family:'Cinzel'">SEAL FATE</h2>
+                <p style="opacity:0.6; font-size:0.8rem;">Tap to Generate</p>
+            </div>
+
+            <div class="card__face card__face--back">
+                
+                <div id="view-fate">
+                    <div id="fate-main" class="fate-gen-text">...</div>
+                    <div id="fate-constraint" class="constraint-text">...</div>
+                    
+                    <div class="btn-group">
+                        <button class="btn-success" onclick="completeTask()">Task Complete</button>
+                        <button class="btn-fail" onclick="failTask()">I Was Caught</button>
+                    </div>
+                </div>
+
+                <div id="view-curse" class="hidden">
+                    <h3 style="color:var(--danger); font-family:'Cinzel'">CURSED</h3>
+                    <div id="curse-text" class="fate-gen-text shake" style="color:var(--danger)">...</div>
+                    <button class="btn-fail" style="margin-top:20px; width:100%" onclick="resetCard()">Accept Penance</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const RANKS = [
+            { name: "INITIATE", color: "#9d00ff", req: 5 },  // Purple
+            { name: "TRICKSTER", color: "#00bfff", req: 10 }, // Blue
+            { name: "PHANTOM", color: "#00ff88", req: 15 },   // Green
+            { name: "MONARCH", color: "#ffd700", req: 20 },    // Gold
+            { name: "ELDER GOD", color: "#ff0055", req: 999 }  // Red
+        ];
+
+        // --- THE GENERATOR LISTS ---
+        
+        const VERBS = [
+            "High-five", "Take a selfie with", "Whisper to", "Steal a pen from", 
+            "Give a thumbs up to", "Stare at", "Walk directly behind", "Hide an object near",
+            "Untie the shoe of", "Ask the time from", "Compliment the shoes of"
+        ];
+
+        const TARGETS = [
+            "a stranger", "a teacher", "your best friend", "someone wearing blue", 
+            "someone eating", "a group of 3 people", "the tallest person in the room",
+            "someone on their phone", "an authority figure"
+        ];
+
+        const CONSTRAINTS = [
+            "without smiling.", "while holding your breath.", "while walking backwards.", 
+            "using only your left hand.", "without breaking eye contact.", 
+            "while plugging one ear.", "in slow motion.", "while looking terrified."
+        ];
+
+        const CURSES = [
+            "SQUAT slightly every time you speak.",
+            "You cannot speak (Mime Mode).",
+            "End every sentence with 'Your Majesty'.",
+            "Speak in a ridiculous fake accent.",
+            "Repeat the last word anyone says to you.",
+            "You must laugh at everything said to you.",
+            "Hold an object above your head for 2 mins."
+        ];
+
+        // --- STATE ---
+        let score = 0;
+        let strikes = 0;
+        let currentRankIndex = 0;
+        let isFlipped = false;
+
+        // --- CORE FUNCTIONS ---
+
+        function generateFate() {
+            // Simple logic: Pick random parts to build a sentence
+            const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
+            const target = TARGETS[Math.floor(Math.random() * TARGETS.length)];
+            const constraint = Math.random() > 0.3 ? CONSTRAINTS[Math.floor(Math.random() * CONSTRAINTS.length)] : ""; // 70% chance of constraint
+
+            return {
+                main: `${verb} ${target}.`,
+                constraint: constraint ? `Condition: ${constraint}` : ""
+            };
+        }
+
+        function drawFate() {
+            if(isFlipped) return;
+
+            // Generate content
+            const fate = generateFate();
+            document.getElementById('fate-main').innerText = fate.main;
+            document.getElementById('fate-constraint').innerText = fate.constraint;
+
+            // Show Fate view
+            document.getElementById('view-fate').classList.remove('hidden');
+            document.getElementById('view-curse').classList.add('hidden');
+
+            flipCard(true);
+        }
+
+        function completeTask() {
+            score++;
+            checkRank();
+            updateProgress();
+            
+            // Visual feedback
+            const btn = document.querySelector('.btn-success');
+            btn.innerText = "SEALED";
+            btn.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+            
+            setTimeout(() => {
+                resetCard();
+                btn.innerText = "TASK COMPLETE";
+                btn.style.background = "transparent";
+            }, 600);
+        }
+
+        function failTask() {
+            strikes++;
+            document.getElementById('strike-count').innerText = strikes;
+
+            if (strikes >= 3) {
+                alert("YOU ARE BANISHED. (Refresh to restart)");
+                location.reload();
+            } else {
+                // Generate Curse
+                const curse = CURSES[Math.floor(Math.random() * CURSES.length)];
+                document.getElementById('curse-text').innerText = curse;
+                
+                // Switch View
+                document.getElementById('view-fate').classList.add('hidden');
+                document.getElementById('view-curse').classList.remove('hidden');
+            }
+        }
+
+        function checkRank() {
+            // Check if we advanced to next rank
+            if (currentRankIndex < RANKS.length - 1) {
+                if (score >= RANKS[currentRankIndex].req) {
+                    currentRankIndex++;
+                    updateTheme();
+                    alert(`ASCENSION! You are now a ${RANKS[currentRankIndex].name}`);
+                }
+            }
+        }
+
+        function updateTheme() {
+            const rank = RANKS[currentRankIndex];
+            const root = document.documentElement;
+            
+            // Change color variables
+            root.style.setProperty('--accent', rank.color);
+            
+            // Update Text
+            document.getElementById('rank-name').innerText = rank.name;
+        }
+
+        function updateProgress() {
+            // Calculate progress to next rank
+            const currentReq = RANKS[currentRankIndex].req;
+            const prevReq = currentRankIndex === 0 ? 0 : RANKS[currentRankIndex-1].req;
+            
+            // Percent within current level
+            let pct = ((score - prevReq) / (currentReq - prevReq)) * 100;
+            if (pct > 100) pct = 0; // Reset bar visually on level up
+            
+            document.getElementById('progress-bar').style.width = pct + "%";
+        }
+
+        function resetCard() {
+            flipCard(false);
+        }
+
+        function flipCard(flip) {
+            const card = document.getElementById('game-card');
+            if(flip) {
+                card.classList.add('is-flipped');
+                isFlipped = true;
+            } else {
+                card.classList.remove('is-flipped');
+                setTimeout(() => { isFlipped = false; }, 600);
+            }
+        }
+
+        // Init
+        updateTheme();
+
+    </script>
+</body>
+</html>
