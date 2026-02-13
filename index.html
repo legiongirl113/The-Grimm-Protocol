@@ -3,372 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Grimm Protocol: Viral Edition</title>
+    <title>The Grimm Protocol</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Oswald:wght@300;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;600&display=swap');
 
         :root {
-            --bg: #000;
-            --text: #fff;
-            --accent: #ff0050; /* TikTok/Recording Red */
-            --secondary: #00f2ea; /* TikTok Cyan */
-            --card-face: #111;
+            --bg: #0a0a0a;
+            --card: #141414;
+            --text: #ffffff;
+            --accent: #d4af37; /* Muted Gold */
+            --subtle: #444;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Oswald', sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        /* --- HEADER --- */
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .brand-sub {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
+        /* --- TYPOGRAPHY --- */
         h1 {
-            margin: 0;
-            font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            background: linear-gradient(45deg, var(--accent), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* --- RECORDING INDICATOR --- */
-        .rec-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 400;
             font-size: 0.9rem;
-            color: var(--accent);
-            font-weight: bold;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--subtle);
+            margin-bottom: 40px;
+            position: absolute;
+            top: 40px;
         }
 
-        .rec-dot {
-            width: 12px;
-            height: 12px;
-            background-color: var(--accent);
-            border-radius: 50%;
-            animation: blink 1.5s infinite;
+        .instruction {
+            font-size: 0.8rem;
+            color: var(--subtle);
+            letter-spacing: 1px;
+            margin-top: 20px;
+            text-transform: uppercase;
         }
 
-        /* --- THE CARD --- */
-        .scene {
-            width: 320px;
-            height: 500px; /* Taller for mobile screens */
-            perspective: 1000px;
+        /* --- THE CARD (CONTAINER) --- */
+        .card-container {
+            width: 85vw;
+            max-width: 350px;
+            aspect-ratio: 3/5; /* Phone screen ratio */
+            perspective: 1500px;
+            cursor: pointer;
         }
 
         .card {
             width: 100%;
             height: 100%;
             position: relative;
-            transition: transform 0.6s;
             transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.2, 1, 0.2, 1); /* Elegant ease */
         }
 
-        .card.is-flipped {
+        .card.flipped {
             transform: rotateY(180deg);
         }
 
-        .card__face {
+        .face {
             position: absolute;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
-            border-radius: 20px;
-            box-shadow: 0 0 30px rgba(255, 0, 80, 0.2);
+            background: var(--card);
+            border: 1px solid #222;
+            border-radius: 2px; /* Sharp, fashion corners */
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 25px;
+            padding: 40px;
             box-sizing: border-box;
-            background: var(--card-face);
-            border: 1px solid #333;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
 
-        .card__face--front {
-            border: 2px solid var(--accent);
-            cursor: pointer;
-            background: radial-gradient(circle at center, #222, #000);
+        /* --- FRONT FACE --- */
+        .front {
+            border: 1px solid var(--subtle);
         }
 
-        .card__face--back {
+        .logo-mark {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-style: italic;
+            color: var(--text);
+        }
+
+        /* --- BACK FACE --- */
+        .back {
             transform: rotateY(180deg);
-            border: 2px solid var(--secondary);
-            background: #111;
+            text-align: center;
+            border: 1px solid var(--accent); /* Gold Border */
         }
 
-        /* --- CONTENT TYPOGRAPHY --- */
-        .fate-title {
-            color: #888;
-            font-size: 0.9rem;
+        .prompt-label {
+            font-size: 0.6rem;
+            color: var(--accent);
+            text-transform: uppercase;
             letter-spacing: 2px;
             margin-bottom: 20px;
-            text-transform: uppercase;
         }
 
-        .fate-gen-text {
-            font-size: 1.4rem;
-            text-align: center;
-            line-height: 1.4;
-            font-weight: 500;
-            color: #fff;
-            margin-bottom: 15px;
+        .prompt-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            line-height: 1.3;
+            margin-bottom: 30px;
         }
 
-        .constraint-box {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .constraint-label {
-            font-size: 0.7rem;
-            color: var(--secondary);
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .constraint-text {
-            font-size: 1rem;
-            color: #fff;
+        .constraint {
+            font-size: 0.9rem;
+            color: #888;
             font-style: italic;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            width: 100%;
         }
 
-        /* --- BUTTONS --- */
-        .btn-group {
-            margin-top: auto;
-            width: 100%;
+        /* --- CONTROLS --- */
+        .controls {
+            position: absolute;
+            bottom: 40px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            gap: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .controls.visible {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         button {
-            padding: 18px;
             background: transparent;
-            border: 1px solid #444;
+            border: 1px solid #333;
             color: #fff;
-            font-family: 'Oswald', sans-serif;
-            font-size: 1rem;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            transition: 0.2s;
-            border-radius: 8px;
-        }
-
-        .btn-main { background: var(--accent); border-color: var(--accent); color: white; }
-        .btn-main:active { transform: scale(0.98); }
-        
-        .btn-fail { border-color: #666; color: #888; }
-        
-        .share-text {
-            margin-top: 20px;
+            padding: 15px 30px;
+            font-family: 'Inter', sans-serif;
             font-size: 0.8rem;
-            color: #666;
-            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        button:hover {
+            border-color: var(--text);
+        }
+
+        /* --- CURSE OVERLAY --- */
+        #curse-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
         
-        .hidden { display: none; }
+        #curse-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="brand-sub">LearnTheDarkTV Presents</div>
-        <h1>The Grimm Protocol</h1>
-    </div>
+    <h1>The Grimm Protocol</h1>
 
-    <div class="rec-indicator">
-        <div class="rec-dot"></div>
-        <div>RECORDING IN PROGRESS</div>
-    </div>
-
-    <div class="scene">
+    <div class="card-container" onclick="revealCard()">
         <div class="card" id="game-card">
             
-            <div class="card__face card__face--front" onclick="drawFate()">
-                <div style="font-size:4rem; margin-bottom:10px;">🎥</div>
-                <h2 style="font-family:'Cinzel'">START CHALLENGE</h2>
-                <p style="opacity:0.6; font-size:0.9rem;">Tap to Generate Content</p>
+            <div class="face front">
+                <div class="logo-mark">G</div>
+                <div class="instruction">Tap to Reveal Fate</div>
             </div>
 
-            <div class="card__face card__face--back">
-                
-                <div id="view-fate" style="width:100%; height:100%; display:flex; flex-direction:column;">
-                    <div class="fate-title">Your Scene</div>
-                    
-                    <div id="fate-main" class="fate-gen-text">...</div>
-                    
-                    <div class="constraint-box">
-                        <div class="constraint-label">Director's Note (Constraint)</div>
-                        <div id="fate-constraint" class="constraint-text">...</div>
-                    </div>
-                    
-                    <div class="btn-group">
-                        <button class="btn-main" onclick="completeTask()">✅ Upload / Complete</button>
-                        <button class="btn-fail" onclick="failTask()">❌ Cut / Fail</button>
-                    </div>
-                </div>
-
-                <div id="view-curse" class="hidden" style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:center;">
-                    <h2 style="color:var(--accent); font-family:'Cinzel'">SCENE RUINED</h2>
-                    <p>You broke character. Your punishment:</p>
-                    <div id="curse-text" class="fate-gen-text" style="color:var(--secondary)">...</div>
-                    <button class="btn-fail" style="margin-top:20px;" onclick="resetCard()">Re-Take Scene</button>
-                </div>
-
+            <div class="face back">
+                <div class="prompt-label">Your Scene</div>
+                <div id="text-main" class="prompt-text">...</div>
+                <div id="text-sub" class="constraint">...</div>
             </div>
+
         </div>
     </div>
 
-    <div class="share-text">
-        Post your proof: <strong>#TheGrimmProtocol</strong>
+    <div class="controls" id="btn-container">
+        <button onclick="nextCard()">Next Fate</button>
+        <button onclick="triggerCurse()" style="color:#666; border-color:#222">I Failed</button>
+    </div>
+
+    <div id="curse-overlay">
+        <div class="prompt-label" style="color: red;">Scene Ruined</div>
+        <div id="curse-text" class="prompt-text" style="text-align:center; padding:20px;">...</div>
+        <button onclick="closeCurse()">Accept Penance</button>
     </div>
 
     <script>
-        // --- THE CONTENT ENGINE (School, Work, Family, Social) ---
+        // --- LUXURY CONTENT ENGINE ---
+        // Simple, relatable, easy to film.
         
-        const VERBS = [
-            "Photobomb", 
-            "Narrate the life of", 
-            "Do a trending dance behind", 
-            "Secretly interview", 
-            "Mimic the posture of",
-            "Slow-motion walk past",
-            "Pretend to be on a chaotic phone call near",
-            "Hold a 'Review' of the outfit of",
-            "Treat this person like a celebrity:",
-            "Stare intensely at the back of the head of",
-            "Hide a random object near"
+        const ACTIONS = [
+            "Compliment", "Secretly film", "Interview", "Start a rumor about", 
+            "Toast to", "Mimic", "Ignore", "Serenade", "Narrate the life of",
+            "Ask for life advice from", "Copy the drink order of"
         ];
 
-        const TARGETS = [
-            "your Teacher / Boss", 
-            "your Mom / Dad", 
-            "a Sibling / Coworker", 
-            "someone eating lunch", 
-            "someone typing on a computer", 
-            "the quietest person in the room",
-            "a family member watching TV",
-            "someone drinking coffee",
-            "a stranger (safely)"
+        const PEOPLE = [
+            "the person to your left", "your mother", "the loudest person here",
+            "your boss / teacher", "the youngest person in the room", 
+            "yourself (in the mirror)", "a complete stranger"
         ];
 
-        const CONSTRAINTS = [
-            "while zooming in and out repeatedly.", 
-            "using the 'Old Age' or 'Sad Face' filter.", 
-            "while holding the phone upside down.", 
-            "without them looking at the camera.", 
-            "while whispering your commentary.", 
-            "in 0.5x (Ultrawide) mode.", 
-            "while you are trying not to laugh.", 
-            "filmed from floor level (Worm's eye view).",
-            "while eating a snack loudly."
+        const VIBES = [
+            "in a british accent.", "while holding back tears.", 
+            "like you are in a reality TV confession.", "without blinking.",
+            "in slow motion.", "while whispering dramatically.",
+            "like you are furious.", "while eating.",
+            "using the 0.5x camera angle."
         ];
 
-        const CURSES = [
-            "Duet yourself: Film a video apologizing to the air.",
-            "The Mime: You cannot speak in your next video.",
-            "The Glitch: You must twitch every 5 seconds for 10 mins.",
-            "Filter Lock: You must keep a ridiculous filter on for 10 mins.",
-            "The Echo: Repeat the last word of everyone's sentence.",
-            "POV: You must narrate everything you do out loud."
+        const PENALTIES = [
+            "You must buy the next round / coffee.",
+            "You cannot speak for 5 minutes.",
+            "You must like the first 5 posts on your feed.",
+            "Post your last photo to your story.",
+            "Hold your phone upside down for 10 mins."
         ];
 
-        // --- STATE ---
         let isFlipped = false;
 
-        function generateFate() {
-            const verb = VERBS[Math.floor(Math.random() * VERBS.length)];
-            const target = TARGETS[Math.floor(Math.random() * TARGETS.length)];
-            const constraint = CONSTRAINTS[Math.floor(Math.random() * CONSTRAINTS.length)];
-
-            return {
-                main: `${verb} ${target}...`,
-                constraint: `${constraint}`
-            };
-        }
-
-        function drawFate() {
-            if(isFlipped) return;
-
-            const fate = generateFate();
-            document.getElementById('fate-main').innerText = fate.main;
-            document.getElementById('fate-constraint').innerText = fate.constraint;
-
-            document.getElementById('view-fate').classList.remove('hidden');
-            document.getElementById('view-curse').classList.add('hidden');
-
-            flipCard(true);
-        }
-
-        function completeTask() {
-            // Visual feedback for success
-            const btn = document.querySelector('.btn-main');
-            const originalText = btn.innerText;
-            btn.innerText = "SAVED TO REEL";
-            btn.style.background = "#00f2ea"; // Cyan
-            btn.style.borderColor = "#00f2ea";
-            btn.style.color = "#000";
+        function revealCard() {
+            if (isFlipped) return;
             
-            setTimeout(() => {
-                resetCard();
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.style.background = "var(--accent)";
-                    btn.style.color = "#fff";
-                    btn.style.borderColor = "var(--accent)";
-                }, 600);
-            }, 800);
+            // Generate
+            const act = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
+            const person = PEOPLE[Math.floor(Math.random() * PEOPLE.length)];
+            const vibe = VIBES[Math.floor(Math.random() * VIBES.length)];
+
+            document.getElementById('text-main').innerHTML = `${act}<br><strong>${person}</strong>`;
+            document.getElementById('text-sub').innerText = vibe;
+
+            // Animate
+            document.getElementById('game-card').classList.add('flipped');
+            document.getElementById('btn-container').classList.add('visible');
+            isFlipped = true;
         }
 
-        function failTask() {
-            const curse = CURSES[Math.floor(Math.random() * CURSES.length)];
-            document.getElementById('curse-text').innerText = curse;
-            
-            document.getElementById('view-fate').classList.add('hidden');
-            document.getElementById('view-curse').classList.remove('hidden');
+        function nextCard() {
+            // Reset
+            document.getElementById('game-card').classList.remove('flipped');
+            document.getElementById('btn-container').classList.remove('visible');
+            setTimeout(() => { isFlipped = false; }, 800);
         }
 
-        function resetCard() {
-            flipCard(false);
+        function triggerCurse() {
+            const pen = PENALTIES[Math.floor(Math.random() * PENALTIES.length)];
+            document.getElementById('curse-text').innerText = pen;
+            document.getElementById('curse-overlay').classList.add('active');
         }
 
-        function flipCard(flip) {
-            const card = document.getElementById('game-card');
-            if(flip) {
-                card.classList.add('is-flipped');
-                isFlipped = true;
-            } else {
-                card.classList.remove('is-flipped');
-                setTimeout(() => { isFlipped = false; }, 600);
-            }
+        function closeCurse() {
+            document.getElementById('curse-overlay').classList.remove('active');
+            nextCard();
         }
     </script>
 </body>
