@@ -5,20 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>The Grimm Protocol</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Jost:wght@300;400;500&display=swap');
 
         :root {
-            --bg: #0a0a0a;
-            --card: #141414;
+            --bg: #050505;
+            --card: #121212;
             --text: #ffffff;
-            --accent: #d4af37; /* Muted Gold */
-            --subtle: #444;
+            --gold: #d4af37; 
+            --gold-dim: #8a701e;
+            --danger: #ff4444;
+            --family-accent: #9d00ff; /* Purple for Family */
+            --friend-accent: #00f2ea; /* Cyan for Friends */
         }
 
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Inter', sans-serif;
+            font-family: 'Jost', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -29,262 +32,317 @@
             overflow: hidden;
         }
 
-        /* --- TYPOGRAPHY --- */
-        h1 {
+        /* --- MODE SELECTION SCREEN --- */
+        #mode-select {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+
+        .mode-btn {
+            width: 80%;
+            max-width: 300px;
+            padding: 30px;
+            margin: 15px 0;
+            border: 1px solid #333;
+            background: #111;
+            color: white;
             font-family: 'Playfair Display', serif;
-            font-weight: 400;
-            font-size: 0.9rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: var(--subtle);
-            margin-bottom: 40px;
-            position: absolute;
-            top: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
         }
 
-        .instruction {
+        .mode-btn span {
+            display: block;
             font-size: 0.8rem;
-            color: var(--subtle);
-            letter-spacing: 1px;
-            margin-top: 20px;
+            font-family: 'Jost', sans-serif;
+            color: #666;
+            margin-top: 10px;
             text-transform: uppercase;
+            letter-spacing: 2px;
         }
 
-        /* --- THE CARD (CONTAINER) --- */
+        .mode-btn:hover { border-color: var(--gold); transform: scale(1.02); }
+
+        /* --- HUD --- */
+        .hud {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+        }
+
+        .rank-label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 2px; }
+        .rank-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold); margin-top: 5px; transition: color 0.5s;}
+
+        .strikes-container { display: flex; gap: 5px; }
+        .strike-dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid #444; }
+        .strike-dot.active { background-color: var(--danger); border-color: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
+        /* --- CARD --- */
         .card-container {
             width: 85vw;
             max-width: 350px;
-            aspect-ratio: 3/5; /* Phone screen ratio */
+            aspect-ratio: 3/5;
             perspective: 1500px;
-            cursor: pointer;
         }
 
         .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            width: 100%; height: 100%; position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.2, 1, 0.2, 1); /* Elegant ease */
+            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        .card.flipped {
-            transform: rotateY(180deg);
-        }
+        .card.flipped { transform: rotateY(180deg); }
 
         .face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
+            position: absolute; width: 100%; height: 100%;
             backface-visibility: hidden;
             background: var(--card);
-            border: 1px solid #222;
-            border-radius: 2px; /* Sharp, fashion corners */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            box-sizing: border-box;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 1px solid #333; border-radius: 4px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 30px; box-sizing: border-box;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
         }
 
-        /* --- FRONT FACE --- */
-        .front {
-            border: 1px solid var(--subtle);
-        }
+        /* FRONT */
+        .face.front { border: 1px solid var(--gold-dim); cursor: pointer; }
+        .logo-text { font-family: 'Playfair Display', serif; font-size: 2rem; text-align: center; line-height: 1.2; }
+        .tap-hint { margin-top: 30px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 3px; color: #666; }
 
-        .logo-mark {
-            font-family: 'Playfair Display', serif;
-            font-size: 4rem;
-            font-style: italic;
-            color: var(--text);
-        }
-
-        /* --- BACK FACE --- */
-        .back {
-            transform: rotateY(180deg);
-            text-align: center;
-            border: 1px solid var(--accent); /* Gold Border */
-        }
-
-        .prompt-label {
-            font-size: 0.6rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-        }
-
-        .prompt-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            line-height: 1.3;
-            margin-bottom: 30px;
-        }
-
-        .constraint {
-            font-size: 0.9rem;
-            color: #888;
-            font-style: italic;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-            width: 100%;
-        }
+        /* BACK */
+        .face.back { transform: rotateY(180deg); border-top: 4px solid var(--gold); }
+        .prompt-main { font-family: 'Playfair Display', serif; font-size: 1.5rem; text-align: center; margin-bottom: 20px; line-height: 1.3; }
+        .prompt-sub { font-size: 0.9rem; color: var(--gold); text-align: center; font-style: italic; padding-top: 20px; border-top: 1px solid #333; width: 100%; }
 
         /* --- CONTROLS --- */
         .controls {
-            position: absolute;
-            bottom: 40px;
-            display: flex;
-            gap: 20px;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
+            margin-top: 40px; display: flex; gap: 20px; opacity: 0; pointer-events: none; transition: opacity 0.5s;
         }
-
-        .controls.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        .controls.visible { opacity: 1; pointer-events: auto; }
 
         button {
-            background: transparent;
-            border: 1px solid #333;
-            color: #fff;
-            padding: 15px 30px;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s;
+            background: transparent; padding: 15px 30px; border: 1px solid #333; color: white;
+            font-family: 'Jost', sans-serif; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;
         }
+        .btn-pass:active { background: var(--gold); color: black; border-color: var(--gold); }
+        .btn-fail:active { border-color: var(--danger); color: var(--danger); }
 
-        button:hover {
-            border-color: var(--text);
+        /* --- OVERLAYS --- */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.8s;
         }
-
-        /* --- CURSE OVERLAY --- */
-        #curse-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.5s;
-        }
+        .overlay.active { opacity: 1; pointer-events: auto; }
         
-        #curse-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
+        .badge-card {
+            background: linear-gradient(135deg, #1a1a1a, #000);
+            border: 2px solid var(--gold); padding: 40px; text-align: center; width: 70vw;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.3);
         }
-
+        .badge-title { font-family: 'Playfair Display'; font-size: 2rem; color: var(--gold); margin-bottom: 10px; margin-top: 20px;}
+        
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <h1>The Grimm Protocol</h1>
-
-    <div class="card-container" onclick="revealCard()">
-        <div class="card" id="game-card">
-            
-            <div class="face front">
-                <div class="logo-mark">G</div>
-                <div class="instruction">Tap to Reveal Fate</div>
-            </div>
-
-            <div class="face back">
-                <div class="prompt-label">Your Scene</div>
-                <div id="text-main" class="prompt-text">...</div>
-                <div id="text-sub" class="constraint">...</div>
-            </div>
-
+    <div id="mode-select">
+        <h1 style="font-family:'Playfair Display'; margin-bottom:40px; color:#666; font-size:1rem; letter-spacing:3px; text-transform:uppercase;">Select Protocol</h1>
+        
+        <div class="mode-btn" onclick="startGame('FAMILY')">
+            The Dynasty
+            <span>Family Edition</span>
+        </div>
+        
+        <div class="mode-btn" onclick="startGame('FRIENDS')">
+            The Circle
+            <span>Friends Edition</span>
         </div>
     </div>
 
-    <div class="controls" id="btn-container">
-        <button onclick="nextCard()">Next Fate</button>
-        <button onclick="triggerCurse()" style="color:#666; border-color:#222">I Failed</button>
+    <div class="hud">
+        <div>
+            <div class="rank-label">Rank</div>
+            <div class="rank-title" id="rank-display">The Nobody</div>
+        </div>
+        <div>
+            <div class="rank-label" style="text-align:right; margin-bottom:5px;">Strikes</div>
+            <div class="strikes-container">
+                <div class="strike-dot" id="dot-1"></div>
+                <div class="strike-dot" id="dot-2"></div>
+                <div class="strike-dot" id="dot-3"></div>
+            </div>
+        </div>
     </div>
 
-    <div id="curse-overlay">
-        <div class="prompt-label" style="color: red;">Scene Ruined</div>
-        <div id="curse-text" class="prompt-text" style="text-align:center; padding:20px;">...</div>
-        <button onclick="closeCurse()">Accept Penance</button>
+    <div class="card-container">
+        <div class="card" id="game-card" onclick="flipCard()">
+            <div class="face front">
+                <div class="logo-text">The<br>Grimm<br>Protocol</div>
+                <div class="tap-hint">Tap to Reveal Fate</div>
+            </div>
+            <div class="face back">
+                <div class="rank-label" style="color: #444; margin-bottom: 20px;">Your Mission</div>
+                <div class="prompt-main" id="fate-text">...</div>
+                <div class="prompt-sub" id="fate-constraint">...</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls" id="controls">
+        <button class="btn-pass" onclick="handleSuccess()">Complete</button>
+        <button class="btn-fail" onclick="handleFail()">I Failed</button>
+    </div>
+
+    <div class="overlay" id="badge-overlay" onclick="closeBadge()">
+        <div class="badge-card">
+            <div style="font-size:3rem">👑</div>
+            <div class="rank-label" style="margin-top:20px;">Ascension</div>
+            <div class="badge-title" id="new-rank-name">THE ICON</div>
+            <p style="color:#666; font-size:0.8rem; margin-top:20px;">Screenshot this token.</p>
+        </div>
+    </div>
+
+    <div class="overlay" id="fail-overlay">
+        <div class="badge-card" style="border-color: var(--danger);">
+            <div style="font-size:3rem">☠️</div>
+            <div class="badge-title" style="color: var(--danger);">EXILED</div>
+            <div class="rank-label">You have been cast out.</div>
+            <button onclick="location.reload()" style="margin-top:30px; border-color: #444;">Restart</button>
+        </div>
     </div>
 
     <script>
-        // --- LUXURY CONTENT ENGINE ---
-        // Simple, relatable, easy to film.
-        
-        const ACTIONS = [
-            "Compliment", "Secretly film", "Interview", "Start a rumor about", 
-            "Toast to", "Mimic", "Ignore", "Serenade", "Narrate the life of",
-            "Ask for life advice from", "Copy the drink order of"
+        // --- 8 LEVELS OF PROGRESSION ---
+        const RANKS = [
+            { title: "The Nobody", score: 0 },
+            { title: "The Guest", score: 1 },
+            { title: "The Initiate", score: 3 },
+            { title: "The Insider", score: 6 },
+            { title: "The Socialite", score: 10 },
+            { title: "The Trendsetter", score: 15 },
+            { title: "The Icon", score: 22 },
+            { title: "The Monarch", score: 30 }
         ];
 
-        const PEOPLE = [
-            "the person to your left", "your mother", "the loudest person here",
-            "your boss / teacher", "the youngest person in the room", 
-            "yourself (in the mirror)", "a complete stranger"
-        ];
+        // --- CONTENT DECKS ---
+        const DECKS = {
+            FAMILY: {
+                verbs: ["Toast to", "Interview", "Hug", "Salute", "Narrate the life of", "Mimic the posture of", "Take a serious selfie with"],
+                targets: ["Mom/Dad", "Grandparent", "the host", "a sibling", "the youngest person here", "the person cooking"],
+                constraints: ["like a news anchor.", "without laughing.", "while holding a fork.", "in a whisper.", "while standing on one leg."]
+            },
+            FRIENDS: {
+                verbs: ["Expose", "Hype up", "Roast (gently)", "Photobomb", "Serenade", "Start a rumor about", "Copy the drink of"],
+                targets: ["your crush", "the loudest person", "the driver", "a stranger", "the person on your left", "yourself (mirror)"],
+                constraints: ["using a weird filter.", "in a british accent.", "while doing a dance move.", "in slow motion.", "without them looking."]
+            }
+        };
 
-        const VIBES = [
-            "in a british accent.", "while holding back tears.", 
-            "like you are in a reality TV confession.", "without blinking.",
-            "in slow motion.", "while whispering dramatically.",
-            "like you are furious.", "while eating.",
-            "using the 0.5x camera angle."
-        ];
-
-        const PENALTIES = [
-            "You must buy the next round / coffee.",
-            "You cannot speak for 5 minutes.",
-            "You must like the first 5 posts on your feed.",
-            "Post your last photo to your story.",
-            "Hold your phone upside down for 10 mins."
-        ];
-
+        // --- STATE ---
+        let score = 0;
+        let strikes = 0;
         let isFlipped = false;
+        let currentRankIndex = 0;
+        let currentMode = 'FRIENDS'; // Default
 
-        function revealCard() {
-            if (isFlipped) return;
+        // --- GAME START ---
+        function startGame(mode) {
+            currentMode = mode;
+            // Visual feedback for mode
+            const root = document.documentElement;
+            if(mode === 'FAMILY') root.style.setProperty('--gold', '#9d00ff'); // Purple theme
+            if(mode === 'FRIENDS') root.style.setProperty('--gold', '#00f2ea'); // Cyan theme
             
-            // Generate
-            const act = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
-            const person = PEOPLE[Math.floor(Math.random() * PEOPLE.length)];
-            const vibe = VIBES[Math.floor(Math.random() * VIBES.length)];
+            // Hide selection screen
+            document.getElementById('mode-select').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('mode-select').style.display = 'none';
+            }, 500);
+        }
 
-            document.getElementById('text-main').innerHTML = `${act}<br><strong>${person}</strong>`;
-            document.getElementById('text-sub').innerText = vibe;
+        // --- CORE LOGIC ---
+        function flipCard() {
+            if(isFlipped) return;
+            
+            // Pull from selected deck
+            const deck = DECKS[currentMode];
+            const verb = deck.verbs[Math.floor(Math.random() * deck.verbs.length)];
+            const target = deck.targets[Math.floor(Math.random() * deck.targets.length)];
+            const constraint = deck.constraints[Math.floor(Math.random() * deck.constraints.length)];
+            
+            document.getElementById('fate-text').innerHTML = `${verb}<br><strong>${target}</strong>`;
+            document.getElementById('fate-constraint').innerText = constraint;
 
             // Animate
             document.getElementById('game-card').classList.add('flipped');
-            document.getElementById('btn-container').classList.add('visible');
+            document.getElementById('controls').classList.add('visible');
             isFlipped = true;
         }
 
-        function nextCard() {
-            // Reset
+        function resetCard() {
             document.getElementById('game-card').classList.remove('flipped');
-            document.getElementById('btn-container').classList.remove('visible');
+            document.getElementById('controls').classList.remove('visible');
             setTimeout(() => { isFlipped = false; }, 800);
         }
 
-        function triggerCurse() {
-            const pen = PENALTIES[Math.floor(Math.random() * PENALTIES.length)];
-            document.getElementById('curse-text').innerText = pen;
-            document.getElementById('curse-overlay').classList.add('active');
+        function handleSuccess() {
+            score++;
+            checkRankUp();
+            resetCard();
         }
 
-        function closeCurse() {
-            document.getElementById('curse-overlay').classList.remove('active');
-            nextCard();
+        function handleFail() {
+            strikes++;
+            updateStrikesUI();
+            if(strikes >= 3) {
+                document.getElementById('fail-overlay').classList.add('active');
+            } else {
+                alert("Strike " + strikes + "/3.");
+                resetCard();
+            }
+        }
+
+        function updateStrikesUI() {
+            if(strikes >= 1) document.getElementById('dot-1').classList.add('active');
+            if(strikes >= 2) document.getElementById('dot-2').classList.add('active');
+            if(strikes >= 3) document.getElementById('dot-3').classList.add('active');
+        }
+
+        function checkRankUp() {
+            if (currentRankIndex < RANKS.length - 1) {
+                const nextRank = RANKS[currentRankIndex + 1];
+                if (score >= nextRank.score) {
+                    currentRankIndex++;
+                    
+                    // Update HUD
+                    document.getElementById('rank-display').innerText = nextRank.title;
+                    
+                    // Show Badge
+                    document.getElementById('new-rank-name').innerText = nextRank.title.toUpperCase();
+                    document.getElementById('badge-overlay').classList.add('active');
+                }
+            }
+        }
+
+        function closeBadge() {
+            document.getElementById('badge-overlay').classList.remove('active');
         }
     </script>
 </body>
