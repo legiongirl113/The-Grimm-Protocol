@@ -4,220 +4,259 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Grimm Protocol | LearnTheDarkTV</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0a0a0a;
-            --text-color: #e0e0e0;
-            --accent-gold: #d4af37;
-            --accent-red: #8b0000;
-            --accent-green: #2e8b57;
-            --card-bg: #1a1a1a;
+            --bg: #FAF9F6; /* Bone White */
+            --text: #111111; /* Matte Black */
+            --gold: #C5A028;
+            --accent: #D32F2F; /* Verdict Red */
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Georgia', serif;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            text-align: center;
+            overflow-x: hidden;
         }
 
-        .container {
-            width: 90%;
-            max-width: 500px;
-            padding: 20px;
+        /* Typography */
+        h1 { font-family: 'Playfair Display', serif; text-transform: uppercase; letter-spacing: 5px; font-size: 1.2rem; margin-bottom: 5px; }
+        .brand-sub { font-size: 0.6rem; letter-spacing: 3px; opacity: 0.4; margin-bottom: 40px; }
+
+        .container { width: 90%; max-width: 400px; text-align: center; display: none; }
+        .active { display: block; animation: fadeIn 0.6s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Kardashian Aesthetic Elements */
+        .card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 0; /* Sharp, high-fashion edges */
+            box-shadow: var(--card-shadow);
+            border: 1px solid #eee;
         }
 
-        .header {
-            margin-bottom: 30px;
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--text);
+            color: white;
+            border: none;
             text-transform: uppercase;
+            font-size: 0.7rem;
             letter-spacing: 2px;
-            color: var(--accent-gold);
-        }
-
-        .mode-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--text-color);
-            padding: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Georgia', serif;
-            text-transform: uppercase;
-            font-size: 0.8rem;
+            margin-bottom: 15px;
+            transition: 0.3s;
         }
 
-        button:hover {
-            background: var(--text-color);
-            color: var(--bg-color);
-        }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--text); }
+        .btn-red { background: var(--accent); }
+        
+        .btn:hover { opacity: 0.8; letter-spacing: 3px; }
 
-        .spicy-btn {
-            border-color: var(--accent-red);
-            color: var(--accent-red);
-        }
+        /* Navigation */
+        .nav-link { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; opacity: 0.5; margin-top: 20px; display: inline-block; }
+        .nav-link:hover { opacity: 1; }
 
-        #game-screen {
-            display: none;
-            background: var(--card-bg);
-            border: 2px solid var(--accent-gold);
-            padding: 40px;
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1);
-        }
+        /* Game Elements */
+        .rank-tag { font-size: 0.6rem; color: var(--gold); letter-spacing: 2px; font-weight: 700; margin-bottom: 10px; display: block; }
+        .mission-text { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 30px 0; line-height: 1.2; font-style: italic; }
+        .strikes { font-size: 0.8rem; letter-spacing: 5px; margin-bottom: 20px; }
+        
+        .profile-dot { width: 60px; height: 60px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-weight: bold; }
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
 
-        .mission-text {
-            font-size: 1.4rem;
-            margin: 20px 0;
-            min-height: 120px;
-            line-height: 1.6;
-        }
-
-        .consequence-text {
-            font-style: italic;
-            color: var(--accent-red);
-            margin-top: 15px;
-            font-size: 0.85rem;
-            border-top: 1px solid #333;
-            padding-top: 15px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--accent-gold);
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-
-        .controls {
-            margin-top: 30px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
+        #verdict-screen { color: var(--accent); }
     </style>
 </head>
 <body>
 
-    <div class="container" id="menu-screen">
-        <h1 class="header">The Grimm Protocol</h1>
-        <p style="font-size: 0.9rem; margin-bottom: 30px;">Choose your path. Reach Level 8 to become The Icon.</p>
+    <div class="container active" id="view-profiles">
+        <h1>The Protocol</h1>
+        <div class="brand-sub">LEARN THE DARK TV</div>
         
-        <div class="mode-selector">
-            <button onclick="startGame('toddler')">Toddler</button>
-            <button onclick="startGame('family')">Family</button>
-            <button onclick="startGame('friends')">Friends</button>
-            <button onclick="startGame('grandparents')">Grandparents</button>
-            <button onclick="startGame('couple_funny')">Couple (Decision)</button>
-            <button class="spicy-btn" onclick="startGame('couple_spicy')">Couple (After Dark)</button>
-        </div>
-        <p style="font-size: 0.7rem; color: #555; margin-top: 40px;">Part of the LearnTheDarkTV Portfolio</p>
+        <div class="profile-grid" id="profile-list">
+            </div>
+
+        <button class="btn btn-outline" onclick="showView('view-create-profile')">+ New Initiate</button>
     </div>
 
-    <div class="container" id="game-screen">
-        <div class="stats">
-            <span id="rank-display">RANK: NOVICE</span>
-            <span id="strikes-display">STRIKES: ○ ○ ○</span>
+    <div class="container" id="view-create-profile">
+        <h1>Registration</h1>
+        <div class="brand-sub">ENTER YOUR ALIAS</div>
+        <input type="text" id="player-name" placeholder="NAME" style="width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #eee; outline: none; text-align: center;">
+        <button class="btn" onclick="createProfile()">Authenticate</button>
+        <span class="nav-link" onclick="showView('view-profiles')">Back</span>
+    </div>
+
+    <div class="container" id="view-modes">
+        <h1 id="welcome-name">Welcome</h1>
+        <div class="brand-sub">SELECT YOUR FATE</div>
+        <div class="card">
+            <button class="btn" onclick="startMode('teens')">Teen Chaos</button>
+            <button class="btn" onclick="startMode('friends')">Adult Chaos</button>
+            <button class="btn" onclick="startMode('couple_funny')">Couple Stakes</button>
+            <button class="btn btn-red" onclick="startMode('couple_spicy')">After Dark (18+)</button>
         </div>
+        <span class="nav-link" onclick="logout()">Exit Protocol</span>
+    </div>
 
-        <div class="mission-text" id="mission-box"></div>
-        <div class="consequence-text" id="consequence-box"></div>
+    <div class="container" id="view-choice">
+        <span class="rank-tag" id="game-rank">RANK: NOVICE</span>
+        <div class="strikes" id="game-strikes">○ ○ ○</div>
+        <div class="card">
+            <h1 style="margin-bottom: 30px;">Choose a path</h1>
+            <button class="btn" onclick="generateMission('truth')">Truth</button>
+            <button class="btn btn-outline" onclick="generateMission('dare')">Dare</button>
+        </div>
+        <span class="nav-link" onclick="showView('view-modes')">Change Mode</span>
+    </div>
 
+    <div class="container" id="view-mission">
+        <span class="rank-tag" id="mission-label">DARE</span>
+        <div class="mission-text" id="mission-content"></div>
         <div class="controls">
-            <button onclick="completeFate()" style="border-color: var(--accent-green); color: var(--accent-green);">Complete</button>
-            <button onclick="failFate()" style="border-color: var(--accent-red); color: var(--accent-red);">I Failed</button>
+            <button class="btn" onclick="completeFate()">I Survived</button>
+            <button class="btn btn-outline" onclick="failFate()">I Failed</button>
         </div>
-        <br>
-        <button onclick="exitGame()" style="font-size: 0.6rem; opacity: 0.6;">EXIT PROTOCOL</button>
+    </div>
+
+    <div class="container" id="view-verdict">
+        <h1 style="color: var(--accent);">Verdict</h1>
+        <div class="brand-sub">THE PRICE MUST BE PAID</div>
+        <div class="mission-text" id="verdict-content" style="font-size: 1.2rem; color: var(--text);"></div>
+        <button class="btn" onclick="showView('view-choice')">I Have Paid</button>
     </div>
 
     <script>
-        const missionData = {
-            toddler: {
-                actions: [{t:"Hop like a", g:"animal"},{t:"Find something", g:"color"},{t:"Touch your", g:"body"},{t:"Wave at a", g:"obj"},{t:"Sound like a", g:"animal"},{t:"Point to something", g:"color"},{t:"Wiggle your", g:"body"},{t:"Hug a", g:"obj"},{t:"Spin toward a", g:"color"},{t:"Act like a", g:"animal"},{t:"Tap a", g:"obj"},{t:"Rub your", g:"body"},{t:"Dance with a", g:"obj"}],
-                targets: [{t:"frog", g:"animal"},{t:"blue", g:"color"},{t:"nose", g:"body"},{t:"soft toy", g:"obj"},{t:"lion", g:"animal"},{t:"red", g:"color"},{t:"elbow", g:"body"},{t:"wall", g:"obj"},{t:"yellow", g:"color"},{t:"monkey", g:"animal"},{t:"couch", g:"obj"},{t:"tummy", g:"body"},{t:"stuffed bunny", g:"obj"}],
-                consequence: "Failure: You have to do the 'Silly Wiggle' for 30 seconds."
-            },
-            family: {
-                actions: [{t:"Act out a scene from", g:"mov"},{t:"Sing a song about", g:"top"},{t:"Start a game of", g:"act"},{t:"Quote a line from", g:"mov"},{t:"Hum the theme of", g:"top"},{t:"Organize a quick", g:"act"},{t:"Describe a", g:"mov"},{t:"Draw a", g:"top"},{t:"Play a round of", g:"act"},{t:"Guess the favorite", g:"top"},{t:"Review the movie", g:"mov"},{t:"Whistle a", g:"top"},{t:"Invent a", g:"act"}],
-                targets: [{t:"Toy Story", g:"mov"},{t:"pizza", g:"top"},{t:"Hide and Seek", g:"act"},{t:"The Lion King", g:"mov"},{t:"dinosaurs", g:"top"},{t:"Tag", g:"act"},{t:"Star Wars", g:"mov"},{t:"a flying car", g:"top"},{t:"Simon Says", g:"act"},{t:"ice cream flavor", g:"top"},{t:"Frozen", g:"mov"},{t:"rainy day", g:"top"},{t:"thumb war", g:"act"}],
-                consequence: "Failure: You must clean up all the shoes in the entryway."
+        const RANKS = ["NOVICE", "APPRENTICE", "INITIATE", "ACOLYTE", "GUARDIAN", "SENTINEL", "ELDER", "THE ICON"];
+        
+        const GAME_DATA = {
+            teens: {
+                truth: ["What is the most 'cringe' thing you've ever done?", "Who in this room would you never go on a date with?", "What secret are you keeping from your parents right now?"],
+                dare: ["Let the group send a random emoji to your last text contact.", "Put your socks on your hands for the next 2 rounds.", "Sneak a napkin onto the host's shoulder without being caught."],
+                verdicts: ["Speak in a British accent for 10 minutes.", "Repeat everything said to you for 3 minutes.", "Hop on one leg every time you want to speak."]
             },
             friends: {
-                actions: [{t:"Text an emoji to", g:"soc"},{t:"Post a weird word on", g:"pla"},{t:"Call a contact and say", g:"soc"},{t:"Show a random photo to", g:"soc"},{t:"DM a funny gif to", g:"soc"},{t:"Let the group pick a word for", g:"pla"},{t:"Show your first photo to", g:"soc"},{t:"Speak only in rhymes to", g:"soc"},{t:"React to the last post on", g:"pla"},{t:"Hide a secret photo from", g:"soc"},{t:"Send a voice note to", g:"soc"},{t:"Update your status on", g:"pla"},{t:"Ask a weird question to", g:"soc"}],
-                targets: [{t:"the 3rd person in your list", g:"soc"},{t:"X (Twitter)", g:"pla"},{t:"your last missed call", g:"soc"},{t:"Instagram", g:"pla"},{t:"your best friend", g:"soc"},{t:"Facebook", g:"pla"},{t:"the person to your left", g:"soc"},{t:"Threads", g:"pla"},{t:"the oldest person here", g:"soc"},{t:"Discord", g:"pla"},{t:"your sibling", g:"soc"},{t:"Snapchat", g:"pla"},{t:"the host", g:"soc"}],
-                consequence: "Failure: You have to buy the next round of snacks."
-            },
-            grandparents: {
-                actions: [{t:"Tell the story of", g:"era"},{t:"Explain how to use a", g:"item"},{t:"Describe your favorite", g:"era"},{t:"Show how to fix a", g:"item"},{t:"Compare today to", g:"era"},{t:"Name the purpose of a", g:"item"},{t:"Recount a lesson from", g:"era"},{t:"Find a use for a", g:"item"},{t:"Name a friend from", g:"era"},{t:"Describe seeing a", g:"item"},{t:"Hum a tune from", g:"era"},{t:"Polish a", g:"item"},{t:"Draw a map of", g:"era"}],
-                targets: [{t:"the summer of '69", g:"era"},{t:"rotary phone", g:"item"},{t:"the 1950s", g:"era"},{t:"typewriter", g:"item"},{t:"the late 70s", g:"era"},{t:"record player", g:"item"},{t:"the 1940s", g:"era"},{t:"sewing machine", g:"item"},{t:"the disco era", g:"era"},{t:"cassette tape", g:"item"},{t:"the jazz age", g:"era"},{t:"pocket watch", g:"item"},{t:"the 1980s", g:"era"}],
-                consequence: "Failure: You have to write a hand-written 'thank you' note to someone tomorrow."
+                truth: ["What is the biggest lie you've told to get out of a social event?", "Who here do you think has the worst taste in music?", "What's the most unhinged thing you've Googled this week?"],
+                dare: ["Successfully steal a pen from the host without being caught.", "Swap an item of clothing with someone across the room.", "Hide someone's phone in a drawer and don't tell them for 5 minutes."],
+                verdicts: ["You are forbidden from speaking until your next turn.", "You must refer to yourself in the third person for the rest of the game.", "Stand in the corner like a statue for 2 rounds."]
             },
             couple_funny: {
-                actions: [{t:"Do the dishes for", g:"tim"},{t:"Give a foot rub for", g:"tim"},{t:"Vacuum the house for", g:"tim"},{t:"Fold the laundry for", g:"tim"},{t:"Cook the next meal for", g:"tim"},{t:"Clean the bathroom for", g:"tim"},{t:"Walk the pet for", g:"tim"},{t:"Rub their shoulders for", g:"tim"},{t:"Pay for takeout for", g:"tim"},{t:"Take out the trash for", g:"tim"},{t:"Mop the kitchen for", g:"tim"},{t:"Organize the closet for", g:"tim"},{t:"Wash the car for", g:"tim"}],
-                targets: [{t:"the next 24 hours", g:"tim"},{t:"one full week", g:"tim"},{t:"the next three days", g:"tim"},{t:"the entire weekend", g:"tim"},{t:"the rest of the day", g:"tim"},{t:"tomorrow morning", g:"tim"},{t:"the next two nights", g:"tim"},{t:"the next week", g:"tim"},{t:"tonight only", g:"tim"},{t:"the next month", g:"tim"},{t:"four consecutive days", g:"tim"},{t:"the upcoming holiday", g:"tim"},{t:"the next 48 hours", g:"tim"}],
-                consequence: "Failure: You owe the winner a 15-minute back rub and a hot bath tonight."
+                truth: ["What's one chore you secretly hope I never ask you to do?", "If we were in a horror movie, who gets caught first?", "What was your actual first impression of me?"],
+                dare: ["Successfully tickle me for 20 seconds straight.", "Hide my wallet and give me 3 'Hot or Cold' clues to find it.", "Convince a neighbor to give you a single piece of fruit."],
+                verdicts: ["You are on Kitchen Duty for the next 48 hours.", "You must address me as 'My Liege' until tomorrow.", "You pay for every meal/takeout this entire weekend."]
             },
             couple_spicy: {
-                actions: [{t:"Trace a line on their", g:"sen"},{t:"Lightly bite their", g:"sen"},{t:"Whisper a secret into their", g:"sen"},{t:"Blindfold and touch their", g:"sen"},{t:"Kiss their", g:"sen"},{t:"Lick their", g:"sen"},{t:"Describe a fantasy about their", g:"sen"},{t:"Use an ice cube on their", g:"sen"},{t:"Reveal a secret about their", g:"sen"},{t:"Breathe heavily on their", g:"sen"},{t:"Nibble on their", g:"sen"},{t:"Seduce their", g:"sen"},{t:"Stroke their", g:"sen"}],
-                targets: [{t:"collarbone", g:"sen"},{t:"lower back", g:"sen"},{t:"earlobe", g:"sen"},{t:"inner thigh", g:"sen"},{t:"neck", g:"sen"},{t:"fingertips", g:"sen"},{t:"shoulder blades", g:"sen"},{t:"belly button", g:"sen"},{t:"palm", g:"sen"},{t:"knee", g:"sen"},{t:"jawline", g:"sen"},{t:"wrist", g:"sen"},{t:"hairline", g:"sen"}],
-                consequence: "Failure: You are responsible for every diaper change and early wake-up call tomorrow."
+                truth: ["What is a fantasy we haven't tried that you're thinking about?", "What's the one thing I do that is an instant turn-on?", "Describe our best night together in three words."],
+                dare: ["Use only your teeth to remove one piece of my clothing.", "Trace a pattern with an ice cube on my skin until it melts.", "Blindfold me and tease me with touch for two minutes."],
+                verdicts: ["You handle every diaper change and early wake-up tomorrow.", "You owe me a 30-minute full-body oil massage.", "You lose the right to pick the next movie for a month."]
             }
         };
 
-        let currentMode = '', strikes = 0, rank = 1;
-        const ranks = ["NOVICE", "APPRENTICE", "INITIATE", "ACOLYTE", "GUARDIAN", "SENTINEL", "ELDER", "THE ICON"];
+        let profiles = JSON.parse(localStorage.getItem('grimm_profiles')) || [];
+        let activeProfileIndex = null;
+        let currentMode = '';
 
-        function startGame(mode) {
-            if (mode === 'couple_spicy' && !confirm("Warning: Adult Content (18+). Continue?")) return;
-            currentMode = mode; strikes = 0; rank = 1;
-            document.getElementById('menu-screen').style.display = 'none';
-            document.getElementById('game-screen').style.display = 'block';
-            updateDisplay(); generateFate();
+        function showView(viewId) {
+            document.querySelectorAll('.container').forEach(c => c.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
         }
 
-        function generateFate() {
-            const mode = missionData[currentMode];
-            const randomAction = mode.actions[Math.floor(Math.random() * mode.actions.length)];
-            const validTargets = mode.targets.filter(t => t.g === randomAction.g);
-            const randomTarget = validTargets[Math.floor(Math.random() * validTargets.length)];
-            document.getElementById('mission-box').innerText = `${randomAction.t} ${randomTarget.t}.`;
-            document.getElementById('consequence-box').innerText = mode.consequence;
+        function renderProfiles() {
+            const list = document.getElementById('profile-list');
+            list.innerHTML = '';
+            profiles.forEach((p, i) => {
+                list.innerHTML += `
+                    <div onclick="selectProfile(${i})">
+                        <div class="profile-dot">${p.name[0]}</div>
+                        <div style="font-size: 0.7rem; font-weight: bold; letter-spacing: 1px;">${p.name}</div>
+                        <div style="font-size: 0.5rem; opacity: 0.5;">LVL ${p.rank}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function createProfile() {
+            const name = document.getElementById('player-name').value;
+            if (!name) return;
+            profiles.push({ name, rank: 1, strikes: 0 });
+            save();
+            renderProfiles();
+            showView('view-profiles');
+        }
+
+        function selectProfile(i) {
+            activeProfileIndex = i;
+            document.getElementById('welcome-name').innerText = profiles[i].name;
+            showView('view-modes');
+        }
+
+        function startMode(mode) {
+            if (mode.includes('spicy') && !confirm("Adult Content (18+). Continue?")) return;
+            currentMode = mode;
+            updateStats();
+            showView('view-choice');
+        }
+
+        function generateMission(type) {
+            const modeData = GAME_DATA[currentMode];
+            const missions = modeData[type];
+            const mission = missions[Math.floor(Math.random() * missions.length)];
+            
+            document.getElementById('mission-label').innerText = type.toUpperCase();
+            document.getElementById('mission-content').innerText = mission;
+            showView('view-mission');
         }
 
         function completeFate() {
-            if (rank < 8) { rank++; generateFate(); updateDisplay(); } 
-            else { alert("ASCENSION COMPLETE! You are THE ICON."); exitGame(); }
+            const p = profiles[activeProfileIndex];
+            if (p.rank < 8) p.rank++;
+            else alert("YOU ARE THE ICON.");
+            save();
+            updateStats();
+            showView('view-choice');
         }
 
         function failFate() {
-            strikes++;
-            if (strikes >= 3) { alert("EXILED. You have failed the protocol."); exitGame(); } 
-            else { updateDisplay(); generateFate(); }
+            const p = profiles[activeProfileIndex];
+            p.strikes++;
+            
+            const modeData = GAME_DATA[currentMode];
+            const verdict = modeData.verdicts[Math.floor(Math.random() * modeData.verdicts.length)];
+            document.getElementById('verdict-content').innerText = verdict;
+            
+            if (p.strikes >= 3) {
+                alert("EXILED. Profile Reset.");
+                p.strikes = 0;
+                p.rank = 1;
+            }
+            save();
+            updateStats();
+            showView('view-verdict');
         }
 
-        function updateDisplay() {
-            document.getElementById('rank-display').innerText = `RANK: ${ranks[rank - 1]}`;
-            document.getElementById('strikes-display').innerText = `STRIKES: ${"● ".repeat(strikes)}${"○ ".repeat(3 - strikes)}`;
+        function updateStats() {
+            const p = profiles[activeProfileIndex];
+            document.getElementById('game-rank').innerText = `RANK: ${RANKS[p.rank - 1]}`;
+            document.getElementById('game-strikes').innerText = "● ".repeat(p.strikes) + "○ ".repeat(3 - p.strikes);
         }
 
-        function exitGame() {
-            document.getElementById('menu-screen').style.display = 'block';
-            document.getElementById('game-screen').style.display = 'none';
-        }
+        function save() { localStorage.setItem('grimm_profiles', JSON.stringify(profiles)); }
+        function logout() { activeProfileIndex = null; showView('view-profiles'); }
+
+        renderProfiles();
     </script>
 </body>
 </html>
